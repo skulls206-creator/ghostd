@@ -1,0 +1,100 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: 'Space Grotesk', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-display: 'Space Grotesk', sans-serif;
+
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-success: hsl(var(--success));
+  --color-success-foreground: hsl(var(--success-foreground));
+  --color-danger: hsl(var(--danger));
+  --color-danger-foreground: hsl(var(--danger-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+}
+
+:root {
+  /* OBSIDIAN TERMINAL — precision-first dark theme */
+  --background: 240 14% 5%;      /* #0b0b0f */
+  --foreground: 210 20% 92%;
+  --card: 240 12% 7%;            /* slightly lifted surface */
+  --card-foreground: 210 20% 92%;
+  --popover: 240 12% 9%;
+  --popover-foreground: 210 20% 92%;
+  --border: 240 8% 12%;          /* near-invisible borders */
+  --input: 240 8% 12%;
+  --primary: 188 97% 43%;        /* #06B6D4 cool-teal */
+  --primary-foreground: 240 14% 5%;
+  --accent: 240 10% 11%;
+  --accent-foreground: 210 20% 92%;
+  --success: 142 71% 45%;        /* warm green */
+  --success-foreground: 240 14% 5%;
+  --danger: 0 84% 60%;           /* warm red */
+  --danger-foreground: 210 20% 92%;
+  --muted: 240 10% 9%;
+  --muted-foreground: 215 12% 50%;
+}
+
+@layer base {
+  body {
+    @apply bg-background text-foreground antialiased font-sans;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-sans);
+    @apply tracking-tight;
+  }
+
+  /* Slim refined scrollbar — teal accent */
+  ::-webkit-scrollbar {
+    width: 3px;
+    height: 3px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 9999px;
+    transition: background 0.2s;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary) / 0.4);
+  }
+}
+
+@layer utilities {
+  .hover-fade {
+    @apply transition-colors duration-150 ease-in-out;
+  }
+  .font-mono {
+    font-family: var(--font-mono);
+  }
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* KHURK OS embedded theme — applied when [data-khurk="true"] is set on <html> */
+[data-khurk="true"] {
+  --background: 240 15% 6%;
+  --card:       240 13% 8%;
+  --popover:    240 13% 10%;
+  --border:     240 8% 13%;
+  --input:      240 8% 13%;
+  --muted:      240 10% 10%;
+  --accent:     240 10% 14%;
+  --primary:    235 86% 65%;
+}

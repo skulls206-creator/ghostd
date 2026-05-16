@@ -1,0 +1,18 @@
+<svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="180" height="180" rx="36" fill="#05010d"/>
+  <path d="M90,26 Q136,26 142,72 L142,148 Q131,136 120,148 Q109,160 90,148 Q71,160 60,148 Q49,136 38,148 L38,72 Q44,26 90,26 Z" fill="#6d28d9"/>
+  <polygon points="90,26 124,54 90,74 56,54" fill="#ddd6fe"/>
+  <polygon points="56,54 38,76 60,100 90,74" fill="#9333ea"/>
+  <polygon points="124,54 142,76 120,100 90,74" fill="#a855f7"/>
+  <polygon points="60,100 90,74 120,100 90,116" fill="#c084fc"/>
+  <path d="M90,26 Q136,26 142,72 L142,148 Q131,136 120,148 Q109,160 90,148 Q71,160 60,148 Q49,136 38,148 L38,72 Q44,26 90,26 Z"
+    fill="none" stroke="#d946ef" stroke-width="2.5" opacity="0.9"/>
+  <line x1="90" y1="26" x2="124" y2="54" stroke="#f0abff" stroke-width="1.5"/>
+  <line x1="90" y1="26" x2="56"  y2="54" stroke="#f0abff" stroke-width="1.5"/>
+  <ellipse cx="67" cy="98" rx="10" ry="11" fill="#08021a"/>
+  <ellipse cx="67" cy="98" rx="6"  ry="7"  fill="#c084fc"/>
+  <ellipse cx="70" cy="96" rx="2.5" ry="2.5" fill="white"/>
+  <ellipse cx="113" cy="98" rx="10" ry="11" fill="#08021a"/>
+  <ellipse cx="113" cy="98" rx="6"  ry="7"  fill="#c084fc"/>
+  <ellipse cx="116" cy="96" rx="2.5" ry="2.5" fill="white"/>
+</svg>
