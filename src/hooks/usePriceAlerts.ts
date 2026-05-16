@@ -3,7 +3,7 @@ import { toast } from "sonner";
 
 function sendNotification(title: string, body: string) {
   if (typeof Notification !== "undefined" && Notification.permission === "granted") {
-    try { new Notification(title, { body, icon: "/pwa-192x192.png" }); } catch {}
+    try { new Notification(title, { body, icon: "/icon-192.png" }); } catch {}
   }
 }
 

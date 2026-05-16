@@ -1,3 +1,4 @@
+import { apiFetch } from "@/lib/apiFetch";
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import {
   useGetTradingPairs,
@@ -249,7 +250,7 @@ const KRAKEN_PAIRS = new Set(["btc", "xmr", "eth", "ltc"]);
 interface PricePoint { ts: number; price: number; }
 
 async function fetchPriceHistory(pair: string, days: string): Promise<PricePoint[]> {
-  const res = await fetch(`/api/market/price-history?pair=${pair}&days=${days}`, {
+  const res = await apiFetch(`/api/market/price-history?pair=${pair}&days=${days}`, {
     credentials: "include",
   });
   if (!res.ok) throw new Error(`price-history ${res.status}`);

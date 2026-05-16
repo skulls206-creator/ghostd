@@ -1,3 +1,4 @@
+import { apiFetch } from "@/lib/apiFetch";
 import { useMemo, useState, useCallback, useEffect } from "react";
 import { Link } from "wouter";
 import { useGetBalance, useGetTicker, useGetMe } from "@/api";
@@ -19,7 +20,7 @@ function usePriceHistory7d(pair: string) {
   return useQuery<{ points: PricePoint[] }>({
     queryKey: ["price-history", pair, "7"],
     queryFn: async () => {
-      const r = await fetch(`/api/market/price-history?pair=${pair}&days=7`);
+      const r = await apiFetch(`/api/market/price-history?pair=${pair}&days=7`);
       if (!r.ok) throw new Error("price-history failed");
       return r.json();
     },

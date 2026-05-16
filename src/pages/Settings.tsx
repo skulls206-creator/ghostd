@@ -212,7 +212,7 @@ function NotificationsSection() {
     try {
       new Notification("GHOSTD Test", {
         body: "Notifications are working correctly.",
-        icon: "/pwa-192x192.png",
+        icon: "/icon-192.png",
       });
     } catch {
       toast.error("Could not send test notification.");

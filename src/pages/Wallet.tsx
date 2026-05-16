@@ -209,7 +209,7 @@ function InlineWithdrawPanel({ currency, balance, onClose }: { currency: Currenc
     if (!submitted?.paymentId) return;
     setSubmitted((s) => s ? { ...s, checking: true, error: null } : s);
     try {
-      const res = await fetch(`/api/wallet/withdraw/check?id=${submitted.paymentId}`);
+      const res = await apiFetch(`/api/wallet/withdraw/check?id=${submitted.paymentId}`);
       const json = await res.json();
       if (!res.ok || json.error) throw new Error(json.error || "Status check failed");
       setSubmitted((s) => s ? { ...s, checking: false, status: json.result as Record<string, unknown> } : s);

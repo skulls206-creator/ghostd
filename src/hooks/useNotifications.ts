@@ -61,7 +61,7 @@ export function useNotifications() {
   const notify = useCallback((title: string, body: string) => {
     if (typeof Notification === "undefined" || Notification.permission !== "granted") return;
     try {
-      new Notification(title, { body, icon: "/pwa-192x192.png", badge: "/pwa-64x64.png" });
+      new Notification(title, { body, icon: "/icon-192.png", badge: "/icon-192.png" });
     } catch {}
   }, []);
 
