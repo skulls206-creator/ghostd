@@ -18,6 +18,16 @@ Only log things future agents need to know. Skip pure-noise commits (typo fixes,
 
 ---
 
+## 2026-05-16 — Backend cookie fix for cross-origin login
+  - **Who**: Replit Agent (main, working in the backend repo)
+  - **Why**: Login from https://ghostd.khurk.xyz appeared to succeed but every subsequent authenticated request returned 401. Browsers were dropping the session cookie because it was being set with `SameSite=Lax; Secure=false` whenever `NODE_ENV !== "production"`, which is the case for the API server running as a Replit dev workflow.
+  - **What changed** (in the **backend** repo, `artifacts/api-server/src/routes/auth.ts`):
+    - `COOKIE_OPTS` now always uses `secure: true, sameSite: "none"`. Removed the `isProd` branch. The frontend is always cross-origin and the API is always served over HTTPS.
+    - `/api/auth/logout` `clearCookie` updated to match.
+  - **Frontend impact**: none. No changes in this repo. Just hard-reload the page if you're testing — old `SameSite=Lax` cookies in the browser need to clear first.
+  - **Migration / follow-up**: if you ever run the API on plain `http://localhost` for development, this change will break cookies there (browsers reject `Secure` on non-HTTPS). Use the Replit dev domain instead — it's HTTPS.
+
+  
 ## 2026-05-16 — Initial migration from Replit monorepo
 - **Who**: Replit Agent (main)
 - **Why**: Move the GHOSTD frontend out of the Replit monorepo (`artifacts/crp-exchange`) into a standalone GitHub repo so other agents can contribute via PRs without touching backend infrastructure.
