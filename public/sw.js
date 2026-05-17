@@ -1,4 +1,4 @@
-const CACHE_NAME = "ghostd-v1";
+const CACHE_NAME = "ghostd-v2";
 const STATIC_ASSETS = [
   "/",
   "/manifest.json",
@@ -60,7 +60,13 @@ self.addEventListener("fetch", (event) => {
           caches.open(CACHE_NAME).then((c) => c.put(event.request, clone));
           return res;
         })
-        .catch(() => caches.match("/") || caches.match(event.request))
+        .catch(async () => {
+            const fallback = (await caches.match("/")) || (await caches.match(event.request));
+            return fallback || new Response(
+              "<!doctype html><meta charset=utf-8><title>Offline</title><body style=\"background:#0b0b0f;color:#06B6D4;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0\">Offline — reconnect to load GHOSTD.</body>",
+              { status: 503, headers: { "Content-Type": "text/html; charset=utf-8" } }
+            );
+          })
     );
     return;
   }
@@ -74,7 +80,7 @@ self.addEventListener("fetch", (event) => {
           caches.open(CACHE_NAME).then((c) => c.put(event.request, clone));
         }
         return res;
-      });
+      }).catch(() => cached || Response.error());
       return cached || networkFetch;
     })
   );
