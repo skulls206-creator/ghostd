@@ -18,6 +18,14 @@ Only log things future agents need to know. Skip pure-noise commits (typo fixes,
 
 ---
 
+## 2026-05-17 — Vite /api proxy for local dev (Plan #12 gap fix)
+- **Who**: Satoshi
+- **Why**: Frontend uses relative `/api/*` URLs which 404 on the Vite dev server when running locally alongside ghostd-api.
+- **What changed**:
+  - `vite.config.ts`: Added `server.proxy` that forwards `/api` to `VITE_API_BASE_URL` (defaults to `http://localhost:3001`).
+- **Migration / follow-up**:
+  - Backend (`ghostd-api`) also got a cookie fix — `Secure` / `SameSite` are now env-gated so login works over plain HTTP on localhost.
+
 ## 2026-05-17 — Local-run bundle (Plan #12)
 - **Who**: Satoshi
 - **Why**: Replace abandoned VPS bridge approach with a local-run setup. Users clone the repo, run one bootstrap script, and the app comes up at localhost.
