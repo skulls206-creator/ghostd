@@ -18,6 +18,19 @@ Only log things future agents need to know. Skip pure-noise commits (typo fixes,
 
 ---
 
+## 2026-05-17 — Local-run bundle (Plan #12)
+- **Who**: Satoshi
+- **Why**: Replace abandoned VPS bridge approach with a local-run setup. Users clone the repo, run one bootstrap script, and the app comes up at localhost.
+- **What changed**:
+  - `scripts/local-bootstrap.sh` — macOS/Linux one-command setup (checks prereqs, creates .env.local, installs, starts dev server)
+  - `scripts/local-bootstrap.ps1` — Windows PowerShell equivalent
+  - `docs/local-run.md` — full walkthrough with per-OS instructions, configuration guide, common errors, signing in, and the Replit session caveat
+  - `.env.local.example` — documented env template with VITE_API_BASE_URL, VITE_BASE, CRP credentials, and optional backend vars
+- **Migration / follow-up**:
+  - Users need Node.js 24+ and pnpm installed
+  - VITE_API_BASE_URL must point at the Replit-hosted backend (HTTPS) for cookies to work (SameSite=None; Secure)
+  - Add `VITE_API_BASE_URL` and `VITE_BASE` to Actions Variables in repo settings
+
 ## 2026-05-16 — Backend cookie fix for cross-origin login
   - **Who**: Replit Agent (main, working in the backend repo)
   - **Why**: Login from https://ghostd.khurk.xyz appeared to succeed but every subsequent authenticated request returned 401. Browsers were dropping the session cookie because it was being set with `SameSite=Lax; Secure=false` whenever `NODE_ENV !== "production"`, which is the case for the API server running as a Replit dev workflow.
