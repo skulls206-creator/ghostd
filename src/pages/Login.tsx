@@ -297,7 +297,11 @@ export function Login() {
 
           <div className="mt-8 pt-4 border-t border-white/[0.06]">
             <p className="text-[10px] text-muted-foreground/60 leading-relaxed">
-              GHOSTD is an interface for{" "}
+              <span className="block mb-2 font-mono text-muted-foreground/50">
+                  build {(import.meta.env.VITE_BUILD_SHA ?? "dev").slice(0, 7)}
+                  {import.meta.env.VITE_BUILD_TIME ? ` · ${import.meta.env.VITE_BUILD_TIME.replace("T", " ").replace("Z", " UTC")}` : ""}
+                </span>
+                GHOSTD is an interface for{" "}
               <a href="https://crp.is" target="_blank" rel="noopener noreferrer" className="text-primary/70 hover:text-primary hover:underline">CRP.is</a>.
               For account or transaction issues, contact{" "}
               <a href="https://crp.is/profile/support" target="_blank" rel="noopener noreferrer" className="text-primary/70 hover:text-primary hover:underline">CRP.is Support ↗</a>
