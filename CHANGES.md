@@ -18,6 +18,14 @@ Only log things future agents need to know. Skip pure-noise commits (typo fixes,
 
 ---
 
+## 2026-05-17 — Wallet balance fix + OrderBook click-to-fill
+- **Who**: Satoshi
+- **Why**: Wallet showed total balance as "Available" instead of net balance; Trade page had no way to click an orderbook row to fill the order entry.
+- **What changed**:
+  - `src/pages/Wallet.tsx`: "Available" now shows `balance - reserve` (net free balance) instead of total balance. `MobileAssetRow` also shows reserve amount. `InlineWithdrawPanel` still receives total balance so MAX works correctly.
+  - `src/pages/Trade.tsx`: `OrderBook` supports `onOrderClick` callback with pointer-down/up tracking for click-and-drag selection. Single click fills the price; drag across multiple rows accumulates amounts and fills price+amount. `OrderEntry` accepts external `orderFromBook` prop and updates tab/price/amount accordingly. `DesktopTradeLayout` and `Trade` both wire the callback chain.
+- **Migration / follow-up**: none
+
 ## 2026-05-17 — Vite /api proxy for local dev (Plan #12 gap fix)
 - **Who**: Satoshi
 - **Why**: Frontend uses relative `/api/*` URLs which 404 on the Vite dev server when running locally alongside ghostd-api.

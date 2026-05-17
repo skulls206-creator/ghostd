@@ -249,6 +249,12 @@ const KRAKEN_PAIRS = new Set(["btc", "xmr", "eth", "ltc"]);
 
 interface PricePoint { ts: number; price: number; }
 
+interface OrderClickPayload {
+  price: number;
+  amount: number;
+  side: "ask" | "bid";
+}
+
 async function fetchPriceHistory(pair: string, days: string): Promise<PricePoint[]> {
   const res = await apiFetch(`/api/market/price-history?pair=${pair}&days=${days}`, {
     credentials: "include",
@@ -386,9 +392,13 @@ function TradeChart({ pair }: { pair: string }) {
   );
 }
 
-function OrderBook({ pair, compact = false }: { pair: string; compact?: boolean }) {
+function OrderBook({ pair, compact = false, onOrderClick }: { pair: string; compact?: boolean; onOrderClick?: (payload: OrderClickPayload) => void }) {
   const { data } = useGetOrderBook({ pair }, { query: { refetchInterval: 5000 } });
   const { copy } = useClipboard();
+
+  const [dragStartIdx, setDragStartIdx] = useState<number | null>(null);
+  const [dragHoverIdx, setDragHoverIdx] = useState<number | null>(null);
+  const [dragSide, setDragSide] = useState<"ask" | "bid" | null>(null);
 
   const asks = [...(data?.asks || [])].sort((a, b) => a.price - b.price);
   const bids = [...(data?.bids || [])].sort((a, b) => b.price - a.price);
@@ -402,39 +412,92 @@ function OrderBook({ pair, compact = false }: { pair: string; compact?: boolean 
     ? "overflow-y-auto overscroll-contain flex flex-col-reverse gap-[1px]"
     : "flex-1 overflow-y-auto overscroll-contain flex flex-col-reverse gap-[1px]";
 
+  const resetDrag = () => {
+    setDragStartIdx(null);
+    setDragHoverIdx(null);
+    setDragSide(null);
+  };
+
+  const handlePointerUp = () => {
+    if (dragStartIdx === null || dragHoverIdx === null || !dragSide) {
+      resetDrag();
+      return;
+    }
+
+    const orders = dragSide === "ask" ? [...asks].reverse() : bids;
+    const start = Math.min(dragStartIdx, dragHoverIdx);
+    const end = Math.max(dragStartIdx, dragHoverIdx);
+
+    if (start === end && orders[start]) {
+      onOrderClick?.({ price: orders[start].price, amount: 0, side: dragSide });
+      resetDrag();
+      return;
+    }
+
+    const selected = orders.slice(start, end + 1);
+    const cumulativeAmount = selected.reduce((sum, o) => sum + o.amount, 0);
+    const lastPrice = selected[selected.length - 1]?.price ?? 0;
+
+    onOrderClick?.({ price: lastPrice, amount: cumulativeAmount, side: dragSide });
+    resetDrag();
+  };
+
+  const isSelected = (side: "ask" | "bid", idx: number) => {
+    if (dragStartIdx === null || dragHoverIdx === null || dragSide !== side) return false;
+    const start = Math.min(dragStartIdx, dragHoverIdx);
+    const end = Math.max(dragStartIdx, dragHoverIdx);
+    return idx >= start && idx <= end;
+  };
+
   return (
-    <div className={cn("flex flex-col font-mono text-[11px] px-0", !compact && "h-full")}>
+    <div
+      className={cn("flex flex-col font-mono text-[11px] px-0", !compact && "h-full")}
+      onPointerUp={handlePointerUp}
+      onPointerLeave={resetDrag}
+    >
       <div className="grid grid-cols-3 text-muted-foreground/40 font-sans pb-1.5 border-b border-white/[0.04] mb-1 text-[9px] uppercase tracking-widest px-3">
         <span>Price</span>
         <span className="text-center">Amount</span>
         <span className="text-right">Total</span>
       </div>
+      {/* Asks: rendered in reverse order (deepest first) */}
       <div className={sectionClass} style={sectionStyle}>
-        {asks.map((ask, i) => (
-          <ContextMenu key={`ask-${i}`}>
-            <ContextMenuTrigger asChild>
-              <div className="relative grid grid-cols-3 h-7 items-center px-3 z-10 group hover:bg-white/[0.03] cursor-pointer">
-                <span className="text-danger font-semibold tabular-nums">{formatCrypto(ask.price)}</span>
-                <span className="text-center text-foreground/70 tabular-nums">{formatCrypto(ask.amount)}</span>
-                <span className="text-right text-muted-foreground/50 tabular-nums">{formatCrypto(ask.value)}</span>
+        {[...asks].reverse().map((ask, i) => {
+          const actualIdx = asks.length - 1 - i;
+          const selected = isSelected("ask", actualIdx);
+          return (
+            <ContextMenu key={`ask-${i}`}>
+              <ContextMenuTrigger asChild>
                 <div
-                  className="absolute top-0 right-0 h-full bg-danger/[0.06] -z-10"
-                  style={{ width: `${(ask.value / maxVol) * 100}%` }}
-                />
-              </div>
-            </ContextMenuTrigger>
-            <ContextMenuContent className="w-44">
-              <ContextMenuLabel className="text-[10px] text-danger">Ask @ {formatCrypto(ask.price)}</ContextMenuLabel>
-              <ContextMenuSeparator />
-              <ContextMenuItem onClick={() => copy(String(ask.price), "Price copied")}>
-                <Copy className="w-3 h-3 mr-2" /> Copy price
-              </ContextMenuItem>
-              <ContextMenuItem onClick={() => copy(String(ask.amount), "Amount copied")}>
-                <Copy className="w-3 h-3 mr-2" /> Copy amount
-              </ContextMenuItem>
-            </ContextMenuContent>
-          </ContextMenu>
-        ))}
+                  className={cn(
+                    "relative grid grid-cols-3 h-7 items-center px-3 z-10 group cursor-pointer",
+                    selected ? "bg-danger/[0.12]" : "hover:bg-white/[0.03]"
+                  )}
+                  onPointerDown={() => { setDragSide("ask"); setDragStartIdx(actualIdx); setDragHoverIdx(actualIdx); }}
+                  onPointerEnter={() => { if (dragSide === "ask" && dragStartIdx !== null) setDragHoverIdx(actualIdx); }}
+                >
+                  <span className="text-danger font-semibold tabular-nums">{formatCrypto(ask.price)}</span>
+                  <span className="text-center text-foreground/70 tabular-nums">{formatCrypto(ask.amount)}</span>
+                  <span className="text-right text-muted-foreground/50 tabular-nums">{formatCrypto(ask.value)}</span>
+                  <div
+                    className="absolute top-0 right-0 h-full bg-danger/[0.06] -z-10"
+                    style={{ width: `${(ask.value / maxVol) * 100}%` }}
+                  />
+                </div>
+              </ContextMenuTrigger>
+              <ContextMenuContent className="w-44">
+                <ContextMenuLabel className="text-[10px] text-danger">Ask @ {formatCrypto(ask.price)}</ContextMenuLabel>
+                <ContextMenuSeparator />
+                <ContextMenuItem onClick={() => copy(String(ask.price), "Price copied")}>
+                  <Copy className="w-3 h-3 mr-2" /> Copy price
+                </ContextMenuItem>
+                <ContextMenuItem onClick={() => copy(String(ask.amount), "Amount copied")}>
+                  <Copy className="w-3 h-3 mr-2" /> Copy amount
+                </ContextMenuItem>
+              </ContextMenuContent>
+            </ContextMenu>
+          );
+        })}
       </div>
       <div className="py-1.5 text-center font-sans font-semibold text-[10px] border-y border-white/[0.04] my-1 text-muted-foreground/50 flex items-center justify-center gap-2">
         Spread{" "}
@@ -443,31 +506,41 @@ function OrderBook({ pair, compact = false }: { pair: string; compact?: boolean 
           : "0.00"}
       </div>
       <div className={compact ? "overflow-y-auto overscroll-contain flex flex-col gap-[1px]" : "flex-1 overflow-y-auto overscroll-contain flex flex-col gap-[1px]"} style={sectionStyle}>
-        {bids.map((bid, i) => (
-          <ContextMenu key={`bid-${i}`}>
-            <ContextMenuTrigger asChild>
-              <div className="relative grid grid-cols-3 h-7 items-center px-3 z-10 group hover:bg-white/[0.03] cursor-pointer">
-                <span className="text-success font-semibold tabular-nums">{formatCrypto(bid.price)}</span>
-                <span className="text-center text-foreground/70 tabular-nums">{formatCrypto(bid.amount)}</span>
-                <span className="text-right text-muted-foreground/50 tabular-nums">{formatCrypto(bid.value)}</span>
+        {bids.map((bid, i) => {
+          const selected = isSelected("bid", i);
+          return (
+            <ContextMenu key={`bid-${i}`}>
+              <ContextMenuTrigger asChild>
                 <div
-                  className="absolute top-0 right-0 h-full bg-success/[0.06] -z-10"
-                  style={{ width: `${(bid.value / maxVol) * 100}%` }}
-                />
-              </div>
-            </ContextMenuTrigger>
-            <ContextMenuContent className="w-44">
-              <ContextMenuLabel className="text-[10px] text-success">Bid @ {formatCrypto(bid.price)}</ContextMenuLabel>
-              <ContextMenuSeparator />
-              <ContextMenuItem onClick={() => copy(String(bid.price), "Price copied")}>
-                <Copy className="w-3 h-3 mr-2" /> Copy price
-              </ContextMenuItem>
-              <ContextMenuItem onClick={() => copy(String(bid.amount), "Amount copied")}>
-                <Copy className="w-3 h-3 mr-2" /> Copy amount
-              </ContextMenuItem>
-            </ContextMenuContent>
-          </ContextMenu>
-        ))}
+                  className={cn(
+                    "relative grid grid-cols-3 h-7 items-center px-3 z-10 group cursor-pointer",
+                    selected ? "bg-success/[0.12]" : "hover:bg-white/[0.03]"
+                  )}
+                  onPointerDown={() => { setDragSide("bid"); setDragStartIdx(i); setDragHoverIdx(i); }}
+                  onPointerEnter={() => { if (dragSide === "bid" && dragStartIdx !== null) setDragHoverIdx(i); }}
+                >
+                  <span className="text-success font-semibold tabular-nums">{formatCrypto(bid.price)}</span>
+                  <span className="text-center text-foreground/70 tabular-nums">{formatCrypto(bid.amount)}</span>
+                  <span className="text-right text-muted-foreground/50 tabular-nums">{formatCrypto(bid.value)}</span>
+                  <div
+                    className="absolute top-0 right-0 h-full bg-success/[0.06] -z-10"
+                    style={{ width: `${(bid.value / maxVol) * 100}%` }}
+                  />
+                </div>
+              </ContextMenuTrigger>
+              <ContextMenuContent className="w-44">
+                <ContextMenuLabel className="text-[10px] text-success">Bid @ {formatCrypto(bid.price)}</ContextMenuLabel>
+                <ContextMenuSeparator />
+                <ContextMenuItem onClick={() => copy(String(bid.price), "Price copied")}>
+                  <Copy className="w-3 h-3 mr-2" /> Copy price
+                </ContextMenuItem>
+                <ContextMenuItem onClick={() => copy(String(bid.amount), "Amount copied")}>
+                  <Copy className="w-3 h-3 mr-2" /> Copy amount
+                </ContextMenuItem>
+              </ContextMenuContent>
+            </ContextMenu>
+          );
+        })}
       </div>
     </div>
   );
@@ -503,7 +576,7 @@ function calcMarketImpact(
   return { marketPrice, avgPrice, slippage, totalQuote, partialFill: remaining > 0 };
 }
 
-function OrderEntry({ pair }: { pair: string }) {
+function OrderEntry({ pair, orderFromBook }: { pair: string; orderFromBook?: OrderClickPayload | null }) {
   const [tab, setTab]           = useState<"buy" | "sell">("buy");
   const [orderType, setOrderType] = useState<"market" | "limit">("market");
   const [pct, setPct]           = useState(0);
@@ -518,6 +591,37 @@ function OrderEntry({ pair }: { pair: string }) {
   const { promptIfNeeded } = useNotifications();
   const { data: balanceData } = useGetBalance({ query: { refetchInterval: 8000 } });
   const { data: bookData }    = useGetOrderBook({ pair }, { query: { refetchInterval: 3000 } });
+
+  // External order-from-orderbook fill
+  const prevOrderRef = useRef<OrderClickPayload | null>(null);
+  useEffect(() => {
+    if (!orderFromBook) return;
+    // Don't re-process the same payload
+    if (prevOrderRef.current &&
+        prevOrderRef.current.price === orderFromBook.price &&
+        prevOrderRef.current.amount === orderFromBook.amount &&
+        prevOrderRef.current.side === orderFromBook.side) return;
+    prevOrderRef.current = orderFromBook;
+
+    const newTab = orderFromBook.side === "ask" ? "buy" : "sell";
+    setTab(newTab);
+    setOrderType("limit");
+
+    if (orderFromBook.amount > 0) {
+      setAmountInput(orderFromBook.amount.toFixed(6));
+      setPct(0);
+    }
+
+    // Calculate limitOffsetPct from the clicked price vs market mid
+    const midPrice = bookData && bookData.asks.length && bookData.bids.length
+      ? (bookData.asks[0].price + bookData.bids[0].price) / 2
+      : orderFromBook.price;
+    if (midPrice > 0 && orderFromBook.price > 0) {
+      const offset = Math.abs((orderFromBook.price - midPrice) / midPrice) * 100;
+      // Round to nearest preset or just set it
+      setLimitOffsetPct(Math.round(offset * 10) / 10 || 1);
+    }
+  }, [orderFromBook, bookData]);
 
   const baseCurrency  = pair.split("_")[0]?.toUpperCase() ?? "";
   const quoteCurrency = pair.split("_")[1]?.toUpperCase() ?? "";
@@ -952,6 +1056,7 @@ export function Trade() {
   const pathPair = location.replace("/trade/", "").replace("/trade", "");
   const { data: pairsData } = useGetTradingPairs({ query: { refetchInterval: 30000 } });
   const pairs = pairsData?.pairs ?? [];
+  const [orderFromBook, setOrderFromBook] = useState<OrderClickPayload | null>(null);
 
   const currentPair = useMemo(() => {
     if (pathPair && pairs.some(p => p.pair === pathPair)) return pathPair;
@@ -963,6 +1068,7 @@ export function Trade() {
   const handlePairSelect = (pair: string) => {
     try { localStorage.setItem(LAST_PAIR_KEY, pair); } catch {}
     setLocation(`/trade/${pair}`);
+    setOrderFromBook(null);
   };
 
   return (
@@ -978,11 +1084,11 @@ export function Trade() {
           <TradeChart pair={currentPair} />
         </Card>
         <Card className="border-white/[0.04] overflow-hidden">
-          <OrderEntry pair={currentPair} />
+          <OrderEntry pair={currentPair} orderFromBook={orderFromBook} />
         </Card>
         <Card className="border-white/[0.04] p-4">
           <p className="text-[9px] uppercase tracking-widest text-muted-foreground/40 font-semibold mb-3">Order Book</p>
-          <OrderBook pair={currentPair} compact />
+          <OrderBook pair={currentPair} compact onOrderClick={setOrderFromBook} />
         </Card>
         <Card className="border-white/[0.04] p-4 space-y-3">
           <p className="text-[9px] uppercase tracking-widest text-muted-foreground/40 font-semibold">Recent Trades</p>
@@ -1003,6 +1109,7 @@ function DesktopTradeLayout({ currentPair }: { currentPair: string }) {
   const [panelOrder, setPanelOrder] = useState<PanelId[]>(getStoredPanelOrder);
   const [reorderMode, setReorderMode] = useState(false);
   const [panelWidths, setPanelWidths] = useState<[number, number, number]>(getStoredPanelWidths);
+  const [orderFromBook, setOrderFromBook] = useState<OrderClickPayload | null>(null);
   const panelWidthsRef = useRef(panelWidths);
   panelWidthsRef.current = panelWidths;
   const containerRef = useRef<HTMLDivElement>(null);
@@ -1058,14 +1165,14 @@ function DesktopTradeLayout({ currentPair }: { currentPair: string }) {
           <Card className="border-white/[0.04] p-4 h-full">
             <p className="text-[9px] uppercase tracking-widest text-muted-foreground/40 font-semibold mb-3">Order Book</p>
             <div className="h-[260px]">
-              <OrderBook pair={currentPair} />
+              <OrderBook pair={currentPair} onOrderClick={setOrderFromBook} />
             </div>
           </Card>
         );
       case "entry":
         return (
           <Card className="border-white/[0.04] overflow-hidden flex flex-col h-full">
-            <OrderEntry pair={currentPair} />
+            <OrderEntry pair={currentPair} orderFromBook={orderFromBook} />
           </Card>
         );
     }

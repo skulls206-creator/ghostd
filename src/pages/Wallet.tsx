@@ -502,12 +502,14 @@ function AssetRow({
 function MobileAssetRow({
   currency,
   balance,
+  reserve,
   expanded,
   onToggle,
   onClose,
 }: {
   currency: Currency;
   balance: number;
+  reserve: number;
   expanded: "deposit" | "withdraw" | null;
   onToggle: (mode: "deposit" | "withdraw") => void;
   onClose: () => void;
@@ -525,6 +527,11 @@ function MobileAssetRow({
         <div className="flex-1 min-w-0">
           <p className="font-bold text-xs uppercase tracking-wide">{currency.name}</p>
           <p className="text-[11px] text-foreground/60 font-mono tabular-nums">{formatCrypto(balance)}</p>
+          {reserve > 0 && (
+            <p className="text-[10px] text-muted-foreground/40 font-mono tabular-nums">
+              {formatCrypto(reserve)} in orders
+            </p>
+          )}
         </div>
         <div className="flex gap-1 shrink-0">
           <button
@@ -553,7 +560,7 @@ function MobileAssetRow({
           <InlineDepositPanel currency={currency} onClose={onClose} />
         )}
         {expanded === "withdraw" && (
-          <InlineWithdrawPanel currency={currency} balance={balance} onClose={onClose} />
+          <InlineWithdrawPanel currency={currency} balance={balance + reserve} onClose={onClose} />
         )}
       </AnimatePresence>
     </div>
@@ -897,7 +904,7 @@ export function Wallet() {
               <AssetRow
                 key={c.id}
                 currency={c}
-                balance={bal?.balance || 0}
+                balance={(bal?.balance ?? 0) - (bal?.reserve ?? 0)}
                 reserve={bal?.reserve || 0}
                 expanded={isExpanded}
                 onToggle={(mode) => handleToggle(c.id, mode)}
@@ -932,7 +939,8 @@ export function Wallet() {
               <MobileAssetRow
                 key={c.id}
                 currency={c}
-                balance={bal?.balance || 0}
+                balance={(bal?.balance ?? 0) - (bal?.reserve ?? 0)}
+                reserve={bal?.reserve || 0}
                 expanded={isExpanded}
                 onToggle={(mode) => handleToggle(c.id, mode)}
                 onClose={() => setExpandedRow(null)}
