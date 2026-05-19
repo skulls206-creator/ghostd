@@ -120,7 +120,7 @@ function DraggablePanel({ id, children, reorderMode }: { id: PanelId; children: 
 }
 
 function PairDropdown({ currentPair, onSelect }: { currentPair: string; onSelect: (p: string) => void }) {
-  const { data } = useGetTradingPairs({ query: { refetchInterval: 30000 } });
+  const { data } = useGetTradingPairs({ query: { queryKey: ["refetch"], refetchInterval: 30000 } });
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -191,7 +191,7 @@ function PairDropdown({ currentPair, onSelect }: { currentPair: string; onSelect
 }
 
 function TickerSummary({ pair, onPairSelect }: { pair: string; onPairSelect: (p: string) => void }) {
-  const { data } = useGetTradingPairs({ query: { refetchInterval: 10000 } });
+  const { data } = useGetTradingPairs({ query: { queryKey: ["refetch"], refetchInterval: 10000 } });
   const info = data?.pairs.find((p) => p.pair === pair);
 
   return (
@@ -393,7 +393,7 @@ function TradeChart({ pair }: { pair: string }) {
 }
 
 function OrderBook({ pair, compact = false, onOrderClick }: { pair: string; compact?: boolean; onOrderClick?: (payload: OrderClickPayload) => void }) {
-  const { data } = useGetOrderBook({ pair }, { query: { refetchInterval: 5000 } });
+  const { data } = useGetOrderBook({ pair }, { query: { queryKey: ["refetch"], refetchInterval: 5000 } });
   const { copy } = useClipboard();
 
   const [dragStartIdx, setDragStartIdx] = useState<number | null>(null);
@@ -589,8 +589,8 @@ function OrderEntry({ pair, orderFromBook }: { pair: string; orderFromBook?: Ord
   const buyMutation  = usePlaceBuyOrder();
   const sellMutation = usePlaceSellOrder();
   const { promptIfNeeded } = useNotifications();
-  const { data: balanceData } = useGetBalance({ query: { refetchInterval: 8000 } });
-  const { data: bookData }    = useGetOrderBook({ pair }, { query: { refetchInterval: 3000 } });
+  const { data: balanceData } = useGetBalance({ query: { queryKey: ["refetch"], refetchInterval: 8000 } });
+  const { data: bookData }    = useGetOrderBook({ pair }, { query: { queryKey: ["refetch"], refetchInterval: 3000 } });
 
   // External order-from-orderbook fill
   const prevOrderRef = useRef<OrderClickPayload | null>(null);
@@ -687,7 +687,7 @@ function OrderEntry({ pair, orderFromBook }: { pair: string; orderFromBook?: Ord
   };
 
   const isPending = buyMutation.isPending || sellMutation.isPending;
-  const errorMsg  = buyMutation.error?.error || sellMutation.error?.error;
+  const errorMsg  = (buyMutation.error as any)?.["error"] || (sellMutation.error as any)?.["error"];
 
   const doSubmit = () => {
     if (amount <= 0 || executionPrice <= 0) return;
@@ -937,7 +937,7 @@ function MyOpenOrders() {
   const queryClient = useQueryClient();
   const { data, isLoading, isFetching, refetch } = useGetOrders(
     { status: "open" },
-    { query: { refetchInterval: 10000 } }
+    { query: { queryKey: ["refetch"], refetchInterval: 10000 } }
   );
   const cancelMutation = useCancelOrder();
 
@@ -1013,7 +1013,7 @@ function MyOpenOrders() {
 }
 
 function TradeHistoryList({ pair }: { pair: string }) {
-  const { data } = useGetTradeHistory({ pair }, { query: { refetchInterval: 5000 } });
+  const { data } = useGetTradeHistory({ pair }, { query: { queryKey: ["refetch"], refetchInterval: 5000 } });
   const quoteCurrency = pair.split("_")[1]?.toUpperCase() ?? "";
   const baseCurrency  = pair.split("_")[0]?.toUpperCase() ?? "";
 
@@ -1054,7 +1054,7 @@ function TradeHistoryList({ pair }: { pair: string }) {
 export function Trade() {
   const [location, setLocation] = useLocation();
   const pathPair = location.replace("/trade/", "").replace("/trade", "");
-  const { data: pairsData } = useGetTradingPairs({ query: { refetchInterval: 30000 } });
+  const { data: pairsData } = useGetTradingPairs({ query: { queryKey: ["refetch"], refetchInterval: 30000 } });
   const pairs = pairsData?.pairs ?? [];
   const [orderFromBook, setOrderFromBook] = useState<OrderClickPayload | null>(null);
 

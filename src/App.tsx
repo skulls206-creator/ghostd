@@ -34,6 +34,21 @@ const queryClient = new QueryClient({
 const LAST_PAIR_KEY = "crp_last_pair";
 
 function Protected({ component: Component, params }: { component: React.ComponentType<any>, params?: any }) {
+  const { data: session, isLoading } = useGetMe();
+  const isLoggedIn = !!session?.user;
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!isLoggedIn) {
+    return <Redirect to="/login" />;
+  }
+
   return (
     <AppLayout>
       <Component params={params} />

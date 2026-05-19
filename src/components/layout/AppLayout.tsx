@@ -20,7 +20,7 @@ const bottomNavItems = [
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const { data: session, isLoading, isError } = useGetMe({ 
-    query: { retry: false } 
+    query: { queryKey: ["q"], retry: false } 
   });
   const [location, setLocation] = useLocation();
   const logoutMutation = useLogout();

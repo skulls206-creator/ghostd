@@ -17,6 +17,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { formatCrypto, cn } from "@/lib/utils";
 import { ArrowDownToLine, ArrowUpFromLine, Ticket, CheckCircle2, AlertCircle, Copy, Check, Loader2, RefreshCw, X, ClipboardPaste, Eye, EyeOff, Wallet2 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ContextMenu, ContextMenuContent, ContextMenuItem,
@@ -662,7 +663,7 @@ function UVoucherPanel() {
               <CheckCircle2 className="w-3.5 h-3.5" />
               {success.type === "created" ? "uVoucher Created!" : "uVoucher Redeemed!"}
             </div>
-            {success.type === "created" && success.data.voucher && (
+            {success.type === "created" && success.data.voucher != null && (
               <div>
                 <p className="text-[9px] uppercase tracking-widest font-semibold text-muted-foreground/40 mb-1">Voucher Code</p>
                 <div className="font-mono bg-white/[0.03] p-2 rounded border border-white/[0.04] break-all text-foreground font-bold text-[11px]">
@@ -893,7 +894,25 @@ export function Wallet() {
         </div>
 
         {isLoading ? (
-          <div className="py-12 text-center text-muted-foreground text-xs">Loading wallet data…</div>
+          <div className="py-4 space-y-2">
+            {[1,2,3,4,5].map((i) => (
+              <div key={i} className="flex items-center h-11 px-1 gap-3">
+                <div className="w-44 flex gap-1 shrink-0">
+                  <Skeleton className="h-6 w-16 rounded" />
+                  <Skeleton className="h-6 w-16 rounded" />
+                </div>
+                <div className="flex items-center gap-2.5 flex-1">
+                  <Skeleton className="w-7 h-7 rounded-full" />
+                  <div className="space-y-1">
+                    <Skeleton className="h-3 w-12" />
+                    <Skeleton className="h-2 w-20" />
+                  </div>
+                </div>
+                <Skeleton className="w-28 h-4" />
+                <Skeleton className="w-24 h-4 hidden sm:block" />
+              </div>
+            ))}
+          </div>
         ) : displayedCurrencies.length === 0 ? (
           <div className="py-10 text-center text-muted-foreground text-xs">No assets with balance.</div>
         ) : (
@@ -928,7 +947,21 @@ export function Wallet() {
           </button>
         </div>
         {isLoading ? (
-          <p className="py-6 text-center text-muted-foreground text-xs">Loading…</p>
+          <div className="py-4 space-y-3">
+            {[1,2,3,4].map((i) => (
+              <div key={i} className="flex items-center gap-3 py-2.5">
+                <Skeleton className="w-7 h-7 rounded-full" />
+                <div className="flex-1 space-y-1">
+                  <Skeleton className="h-3 w-12" />
+                  <Skeleton className="h-2.5 w-16" />
+                </div>
+                <div className="flex gap-1">
+                  <Skeleton className="w-7 h-7 rounded" />
+                  <Skeleton className="w-7 h-7 rounded" />
+                </div>
+              </div>
+            ))}
+          </div>
         ) : displayedCurrencies.length === 0 ? (
           <p className="py-6 text-center text-muted-foreground text-xs">No assets with balance.</p>
         ) : (

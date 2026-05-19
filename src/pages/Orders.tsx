@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { formatCrypto, formatDate } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { ClipboardList } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 
 export function Orders() {
@@ -47,9 +48,17 @@ export function Orders() {
           </thead>
           <tbody className="font-mono text-[11px]">
             {isLoading ? (
-              <tr>
-                <td colSpan={7} className="py-12 text-center text-muted-foreground font-sans text-xs">Loading orders…</td>
-              </tr>
+              Array.from({ length: 5 }).map((_, i) => (
+                <tr key={i} className="h-9 border-b border-white/[0.02]">
+                  <td className="py-2 pl-1 pr-4"><Skeleton className="h-3 w-20" /></td>
+                  <td className="py-2 px-4"><Skeleton className="h-3 w-12" /></td>
+                  <td className="py-2 px-4"><Skeleton className="h-4 w-10 rounded-full" /></td>
+                  <td className="py-2 px-4 text-right"><Skeleton className="h-3 w-16 ml-auto" /></td>
+                  <td className="py-2 px-4 text-right"><Skeleton className="h-3 w-14 ml-auto" /></td>
+                  <td className="py-2 px-4 text-right"><Skeleton className="h-3 w-14 ml-auto" /></td>
+                  <td className="py-2 pl-4 pr-1" />
+                </tr>
+              ))
             ) : data?.orders.length === 0 ? (
               <tr>
                 <td colSpan={7} className="py-16 text-center font-sans">

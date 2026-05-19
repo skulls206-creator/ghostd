@@ -5,6 +5,7 @@ import { formatCrypto, formatDate, cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowDownToLine, ArrowUpFromLine, ArrowRightLeft, DollarSign, ClipboardList, Copy, TrendingUp } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   ContextMenu, ContextMenuContent, ContextMenuItem,
   ContextMenuSeparator, ContextMenuLabel, ContextMenuTrigger,
@@ -110,7 +111,17 @@ function MyOrdersTab() {
           </thead>
           <tbody className="font-mono text-[11px]">
             {isLoading ? (
-              <tr><td colSpan={7} className="py-12 text-center text-muted-foreground font-sans text-xs">Loading orders…</td></tr>
+              Array.from({ length: 5 }).map((_, i) => (
+                <tr key={i} className="h-9 border-b border-white/[0.02]">
+                  <td className="py-2 pl-1 pr-4"><Skeleton className="h-3 w-20" /></td>
+                  <td className="py-2 px-4"><Skeleton className="h-3 w-12" /></td>
+                  <td className="py-2 px-4"><Skeleton className="h-4 w-10 rounded-full" /></td>
+                  <td className="py-2 px-4"><Skeleton className="h-3 w-8 rounded-full" /></td>
+                  <td className="py-2 px-4 text-right"><Skeleton className="h-3 w-16 ml-auto" /></td>
+                  <td className="py-2 px-4 text-right"><Skeleton className="h-3 w-14 ml-auto" /></td>
+                  <td className="py-2 pl-4 pr-1 text-right"><Skeleton className="h-3 w-14 ml-auto" /></td>
+                </tr>
+              ))
             ) : error ? (
               <tr><td colSpan={7} className="py-12 text-center text-danger font-sans text-xs">Failed to load orders.</td></tr>
             ) : orders.length === 0 ? (
@@ -172,7 +183,21 @@ function MyOrdersTab() {
 
       <div className="md:hidden divide-y divide-white/[0.03]">
         {isLoading ? (
-          <p className="py-6 text-center text-muted-foreground text-xs">Loading orders…</p>
+          <div className="py-4 space-y-3">
+            {[1,2,3,4].map((i) => (
+              <div key={i} className="px-1 py-2.5 space-y-2">
+                <div className="flex justify-between">
+                  <Skeleton className="h-3 w-16" />
+                  <Skeleton className="h-3 w-14" />
+                </div>
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-4 w-10 rounded-full" />
+                  <Skeleton className="h-3 w-8 rounded-full" />
+                  <Skeleton className="h-3 w-16 ml-auto" />
+                </div>
+              </div>
+            ))}
+          </div>
         ) : orders.length === 0 ? (
           <div className="py-12 flex flex-col items-center gap-3">
             <div className="w-12 h-12 rounded-xl bg-muted/50 border border-white/[0.04] flex items-center justify-center">
@@ -222,7 +247,17 @@ function TransactionsTab() {
           </thead>
           <tbody className="font-mono text-[11px]">
             {isLoading ? (
-              <tr><td colSpan={7} className="py-12 text-center text-muted-foreground font-sans text-xs">Loading…</td></tr>
+              Array.from({ length: 5 }).map((_, i) => (
+                <tr key={i} className="h-9 border-b border-white/[0.02]">
+                  <td className="py-2 pl-1 pr-4"><Skeleton className="h-3 w-20" /></td>
+                  <td className="py-2 px-4"><Skeleton className="h-4 w-14 rounded-full" /></td>
+                  <td className="py-2 px-4"><Skeleton className="h-3 w-10" /></td>
+                  <td className="py-2 px-4 text-right"><Skeleton className="h-3 w-16 ml-auto" /></td>
+                  <td className="py-2 px-4 text-right"><Skeleton className="h-3 w-14 ml-auto" /></td>
+                  <td className="py-2 px-4"><Skeleton className="h-3 w-12" /></td>
+                  <td className="py-2 pl-4 pr-1"><Skeleton className="h-3 w-16" /></td>
+                </tr>
+              ))
             ) : error ? (
               <tr><td colSpan={7} className="py-12 text-center text-danger font-sans text-xs">Failed to load.</td></tr>
             ) : txs.length === 0 ? (
@@ -275,7 +310,20 @@ function TransactionsTab() {
 
       <div className="md:hidden divide-y divide-white/[0.03]">
         {isLoading ? (
-          <p className="py-6 text-center text-muted-foreground text-xs">Loading…</p>
+          <div className="py-4 space-y-3">
+            {[1,2,3,4].map((i) => (
+              <div key={i} className="px-1 py-2.5 space-y-2">
+                <div className="flex justify-between">
+                  <Skeleton className="h-4 w-14 rounded-full" />
+                  <Skeleton className="h-3 w-14" />
+                </div>
+                <div className="flex justify-between">
+                  <Skeleton className="h-3 w-10" />
+                  <Skeleton className="h-3 w-16" />
+                </div>
+              </div>
+            ))}
+          </div>
         ) : txs.length === 0 ? (
           <p className="py-6 text-center text-muted-foreground/40 text-xs">No transactions found.</p>
         ) : txs.map((t, i) => (

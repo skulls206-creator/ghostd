@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useLocation } from "wouter";
+import { useLocation, Redirect } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
-import { useLogin, getGetMeQueryKey } from "@/api";
+import { useLogin, useGetMe, getGetMeQueryKey } from "@/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { KeyRound, Lock, Shield, ExternalLink, Download } from "lucide-react";
@@ -98,11 +98,29 @@ export function Login() {
   const queryClient = useQueryClient();
   const loginMutation = useLogin();
 
+  // Redirect to dashboard if already logged in
+  const { data: session, isLoading: sessionLoading } = useGetMe();
+  if (!sessionLoading && !!session?.user) {
+    return <Redirect to="/dashboard" />;
+  }
+
   const { register, handleSubmit, formState: { errors } } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
   });
 
-  const onSubmit = (data: LoginFormValues) => {
+  // Client-side rate limiting: allow one login attempt every 3 seconds
+  const lastAttemptRef = useRef(0);
+  const [rateLimited, setRateLimited] = useState(false);
+
+  const onSubmit = useCallback((data: LoginFormValues) => {
+    const now = Date.now();
+    if (now - lastAttemptRef.current < 3000) {
+      setRateLimited(true);
+      setTimeout(() => setRateLimited(false), 3000);
+      return;
+    }
+    lastAttemptRef.current = now;
+
     loginMutation.mutate(
       { data: { ...data, twoFaPin: data.twoFaPin || null } },
       {
@@ -112,7 +130,7 @@ export function Login() {
         }
       }
     );
-  };
+  }, [loginMutation, queryClient, setLocation]);
 
   return (
     <div className="min-h-screen grid lg:grid-cols-2 bg-background">
@@ -242,7 +260,13 @@ export function Login() {
 
                   {loginMutation.isError && (
                     <div className="py-2 text-danger text-xs text-center border border-danger/20 rounded bg-danger/5">
-                      {loginMutation.error?.error || "Login failed. Check your credentials."}
+                      {(loginMutation.error as any)?.["error"] || "Login failed. Check your credentials."}
+                    </div>
+                  )}
+
+                  {rateLimited && (
+                    <div className="py-2 text-warning text-xs text-center border border-warning/20 rounded bg-warning/5">
+                      Please wait before trying again.
                     </div>
                   )}
 
@@ -298,8 +322,9 @@ export function Login() {
           <div className="mt-8 pt-4 border-t border-white/[0.06]">
             <p className="text-[10px] text-muted-foreground/60 leading-relaxed">
               <span className="block mb-2 font-mono text-muted-foreground/50">
-                  build {(import.meta.env.VITE_BUILD_SHA ?? "dev").slice(0, 7)}
-                  {import.meta.env.VITE_BUILD_TIME ? ` · ${import.meta.env.VITE_BUILD_TIME.replace("T", " ").replace("Z", " UTC")}` : ""}
+                  {import.meta.env.DEV && (
+                    <>build {(import.meta.env.VITE_BUILD_SHA ?? "dev").slice(0, 7)}{import.meta.env.VITE_BUILD_TIME ? ` · ${import.meta.env.VITE_BUILD_TIME.replace("T", " ").replace("Z", " UTC")}` : ""}</>
+                  )}
                 </span>
                 GHOSTD is an interface for{" "}
               <a href="https://crp.is" target="_blank" rel="noopener noreferrer" className="text-primary/70 hover:text-primary hover:underline">CRP.is</a>.

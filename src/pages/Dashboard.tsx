@@ -97,7 +97,7 @@ export function Dashboard() {
   const { data: session } = useGetMe();
   const { data: balanceData, isLoading: loadingBalances } = useGetBalance();
   const { data: tickers, isLoading: loadingTickers } = useGetTicker({
-    query: { refetchInterval: 15000 }
+    query: { queryKey: ["q"], refetchInterval: 15000 }
   });
 
   const portfolioValue = useMemo(() => {

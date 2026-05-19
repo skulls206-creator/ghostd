@@ -74,6 +74,7 @@ export interface TickerEntry {
   ask: number;
   bid: number;
   enable: boolean;
+  open: number;
 }
 
 export interface TradingPair {

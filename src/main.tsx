@@ -6,6 +6,10 @@ if ("serviceWorker" in navigator) {
   // When a new SW takes control of this page, reload immediately so fresh
   // files replace any stale cached version (handles the old instaghost→ghostd
   // cache-bust automatically for all users).
+  //
+  // NOTE: `reloading` is module-scoped (per page load). On reload, the entire
+  // JS context resets, so `reloading` starts fresh at `false` every time.
+  // This prevents duplicate reloads from rapid `controllerchange` events.
   let reloading = false;
   navigator.serviceWorker.addEventListener("controllerchange", () => {
     if (!reloading) {
@@ -40,7 +44,10 @@ if ("serviceWorker" in navigator) {
       });
 
       // Periodic background sync for market data refresh
-      if ("periodicSync" in reg) {
+      // NOTE: Use proper feature detection — `"periodicSync" in reg` is unreliable
+      // because it's a prototype property of ServiceWorkerRegistration.
+      // Wrap in try/catch to handle unsupported browsers gracefully.
+      if ("periodicSync" in ServiceWorkerRegistration.prototype) {
         try {
           const status = await navigator.permissions.query({
             name: "periodic-background-sync" as PermissionName,
