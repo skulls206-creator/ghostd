@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 const loginSchema = z.object({
   publicKey: z.string().min(1, "Public key is required"),
   password: z.string().min(1, "Password is required"),
-  twoFaPin: z.string().optional(),
+  twoFaPin: z.string().max(8, "PIN must be at most 8 characters").optional(),
 });
 type LoginFormValues = z.infer<typeof loginSchema>;
 
@@ -252,6 +252,8 @@ export function Login() {
                     <Input
                       {...register("twoFaPin")}
                       ghost
+                      type="password"
+                      maxLength={8}
                       autoComplete="one-time-code"
                       icon={<Shield className="w-3.5 h-3.5" />}
                       placeholder="2FA PIN (optional)"
