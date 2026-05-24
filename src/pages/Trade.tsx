@@ -1018,14 +1018,14 @@ function TradeHistoryList({ pair }: { pair: string }) {
   const baseCurrency  = pair.split("_")[0]?.toUpperCase() ?? "";
 
   return (
-    <div className="flex flex-col flex-1 min-h-0">
+    <div>
       <div className="grid grid-cols-4 px-0 pb-1.5 border-b border-white/[0.04] text-[9px] uppercase tracking-widest text-muted-foreground/40 font-semibold mb-1">
         <span>Side</span>
         <span className="text-right">Price ({quoteCurrency})</span>
         <span className="text-right">Amount</span>
         <span className="text-right">Time</span>
       </div>
-      <div className="flex-1 min-h-0 overflow-y-auto font-mono text-[11px] space-y-[1px]">
+      <div className="h-[260px] overflow-y-auto font-mono text-[11px] space-y-[1px]">
         {(data?.items ?? []).slice(0, 100).map((trade, i) => (
           <div
             key={trade.recordId || i}
@@ -1155,7 +1155,7 @@ function DesktopTradeLayout({ currentPair }: { currentPair: string }) {
     switch (id) {
       case "trades":
         return (
-          <Card className="border-white/[0.04] p-4 flex flex-col gap-3 h-full">
+          <Card className="border-white/[0.04] p-4 space-y-3 h-full">
             <p className="text-[9px] uppercase tracking-widest text-muted-foreground/40 font-semibold">Recent Trades</p>
             <TradeHistoryList pair={currentPair} />
           </Card>
