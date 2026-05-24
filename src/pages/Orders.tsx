@@ -59,7 +59,7 @@ export function Orders() {
                   <td className="py-2 pl-4 pr-1" />
                 </tr>
               ))
-            ) : data?.orders.length === 0 ? (
+            ) : (data?.orders ?? []).length === 0 ? (
               <tr>
                 <td colSpan={7} className="py-16 text-center font-sans">
                   <div className="flex flex-col items-center gap-3">
@@ -74,7 +74,7 @@ export function Orders() {
                 </td>
               </tr>
             ) : (
-              data?.orders.map((o) => (
+              (data?.orders ?? []).map((o) => (
                 <tr key={o.orderId} className="h-9 hover:bg-white/[0.02] transition-colors border-b border-white/[0.02] group">
                   <td className="py-2 pl-1 pr-4 text-muted-foreground/40 font-sans text-[10px]">
                     {formatDate(o.dateReg)}

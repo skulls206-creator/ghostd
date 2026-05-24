@@ -99,7 +99,7 @@ function MarketStatCards({ tickers }: { tickers: any[] }) {
 }
 
 export function Markets() {
-  const { data: tickers, isLoading, refetch } = useGetTicker({ query: { queryKey: ["q"], refetchInterval: 10000 } });
+  const { data: tickers, isLoading, refetch } = useGetTicker({ query: { refetchInterval: 10000 } });
   const [search, setSearch] = useState("");
   const [showWatchlistOnly, setShowWatchlistOnly] = useState(false);
   const [, navigate] = useLocation();

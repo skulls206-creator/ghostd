@@ -38,8 +38,8 @@ function MiniOrderEntry({ pair, onClose }: { pair: string; onClose: () => void }
   const buyMutation = usePlaceBuyOrder();
   const sellMutation = usePlaceSellOrder();
   const { promptIfNeeded } = useNotifications();
-  const { data: balanceData } = useGetBalance({ query: { queryKey: ["q"], refetchInterval: 8000 } });
-  const { data: bookData } = useGetOrderBook({ pair }, { query: { queryKey: ["q"], refetchInterval: 3000 } });
+  const { data: balanceData } = useGetBalance({ query: { refetchInterval: 8000 } });
+  const { data: bookData } = useGetOrderBook({ pair }, { query: { refetchInterval: 3000 } });
 
   const baseCurrency = pair.split("_")[0]?.toUpperCase() ?? "";
   const quoteCurrency = pair.split("_")[1]?.toUpperCase() ?? "";
@@ -48,8 +48,8 @@ function MiniOrderEntry({ pair, onClose }: { pair: string; onClose: () => void }
   const asks = bookData?.asks ?? [];
   const bids = bookData?.bids ?? [];
 
-  const rawBaseBalance = balanceData?.balances.find(b => b.currency.name.toLowerCase() === pair.split("_")[0])?.balance ?? 0;
-  const rawQuoteBalance = balanceData?.balances.find(b => b.currency.name.toLowerCase() === pair.split("_")[1])?.balance ?? 0;
+  const rawBaseBalance = (balanceData?.balances ?? []).find(b => b.currency.name.toLowerCase() === pair.split("_")[0])?.balance ?? 0;
+  const rawQuoteBalance = (balanceData?.balances ?? []).find(b => b.currency.name.toLowerCase() === pair.split("_")[1])?.balance ?? 0;
   const baseBalance = Math.max(0, rawBaseBalance + baseOffset);
   const quoteBalance = Math.max(0, rawQuoteBalance + quoteOffset);
 

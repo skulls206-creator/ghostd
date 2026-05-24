@@ -120,7 +120,7 @@ function DraggablePanel({ id, children, reorderMode }: { id: PanelId; children: 
 }
 
 function PairDropdown({ currentPair, onSelect }: { currentPair: string; onSelect: (p: string) => void }) {
-  const { data } = useGetTradingPairs({ query: { queryKey: ["refetch"], refetchInterval: 30000 } });
+  const { data } = useGetTradingPairs({ query: { refetchInterval: 30000 } });
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -191,8 +191,8 @@ function PairDropdown({ currentPair, onSelect }: { currentPair: string; onSelect
 }
 
 function TickerSummary({ pair, onPairSelect }: { pair: string; onPairSelect: (p: string) => void }) {
-  const { data } = useGetTradingPairs({ query: { queryKey: ["refetch"], refetchInterval: 10000 } });
-  const info = data?.pairs.find((p) => p.pair === pair);
+  const { data } = useGetTradingPairs({ query: { refetchInterval: 10000 } });
+  const info = (data?.pairs ?? []).find((p) => p.pair === pair);
 
   return (
     <div className="px-4 py-2.5 border-b border-white/[0.04] flex flex-wrap items-center gap-x-8 gap-y-2">
@@ -393,7 +393,7 @@ function TradeChart({ pair }: { pair: string }) {
 }
 
 function OrderBook({ pair, compact = false, onOrderClick }: { pair: string; compact?: boolean; onOrderClick?: (payload: OrderClickPayload) => void }) {
-  const { data } = useGetOrderBook({ pair }, { query: { queryKey: ["refetch"], refetchInterval: 5000 } });
+  const { data } = useGetOrderBook({ pair }, { query: { refetchInterval: 5000 } });
   const { copy } = useClipboard();
 
   const [dragStartIdx, setDragStartIdx] = useState<number | null>(null);
@@ -589,8 +589,8 @@ function OrderEntry({ pair, orderFromBook }: { pair: string; orderFromBook?: Ord
   const buyMutation  = usePlaceBuyOrder();
   const sellMutation = usePlaceSellOrder();
   const { promptIfNeeded } = useNotifications();
-  const { data: balanceData } = useGetBalance({ query: { queryKey: ["refetch"], refetchInterval: 8000 } });
-  const { data: bookData }    = useGetOrderBook({ pair }, { query: { queryKey: ["refetch"], refetchInterval: 3000 } });
+  const { data: balanceData } = useGetBalance({ query: { refetchInterval: 8000 } });
+  const { data: bookData }    = useGetOrderBook({ pair }, { query: { refetchInterval: 3000 } });
 
   // External order-from-orderbook fill
   const prevOrderRef = useRef<OrderClickPayload | null>(null);
@@ -631,8 +631,8 @@ function OrderEntry({ pair, orderFromBook }: { pair: string; orderFromBook?: Ord
   const asks = bookData?.asks ?? [];
   const bids = bookData?.bids ?? [];
 
-  const rawBaseBalance  = balanceData?.balances.find((b) => b.currency.name.toLowerCase() === pair.split("_")[0])?.balance ?? 0;
-  const rawQuoteBalance = balanceData?.balances.find((b) => b.currency.name.toLowerCase() === pair.split("_")[1])?.balance ?? 0;
+  const rawBaseBalance  = (balanceData?.balances ?? []).find((b) => b.currency.name.toLowerCase() === pair.split("_")[0])?.balance ?? 0;
+  const rawQuoteBalance = (balanceData?.balances ?? []).find((b) => b.currency.name.toLowerCase() === pair.split("_")[1])?.balance ?? 0;
   const baseBalance  = Math.max(0, rawBaseBalance  + baseOffset);
   const quoteBalance = Math.max(0, rawQuoteBalance + quoteOffset);
 
@@ -937,7 +937,7 @@ function MyOpenOrders() {
   const queryClient = useQueryClient();
   const { data, isLoading, isFetching, refetch } = useGetOrders(
     { status: "open" },
-    { query: { queryKey: ["refetch"], refetchInterval: 10000 } }
+    { query: { refetchInterval: 10000 } }
   );
   const cancelMutation = useCancelOrder();
 
@@ -1013,20 +1013,20 @@ function MyOpenOrders() {
 }
 
 function TradeHistoryList({ pair }: { pair: string }) {
-  const { data } = useGetTradeHistory({ pair }, { query: { queryKey: ["refetch"], refetchInterval: 5000 } });
+  const { data } = useGetTradeHistory({ pair }, { query: { refetchInterval: 5000 } });
   const quoteCurrency = pair.split("_")[1]?.toUpperCase() ?? "";
   const baseCurrency  = pair.split("_")[0]?.toUpperCase() ?? "";
 
   return (
-    <div>
+    <div className="flex flex-col flex-1 min-h-0">
       <div className="grid grid-cols-4 px-0 pb-1.5 border-b border-white/[0.04] text-[9px] uppercase tracking-widest text-muted-foreground/40 font-semibold mb-1">
         <span>Side</span>
         <span className="text-right">Price ({quoteCurrency})</span>
         <span className="text-right">Amount</span>
         <span className="text-right">Time</span>
       </div>
-      <div className="h-[200px] overflow-y-auto font-mono text-[11px] space-y-[1px]">
-        {data?.items.slice(0, 100).map((trade, i) => (
+      <div className="flex-1 min-h-0 overflow-y-auto font-mono text-[11px] space-y-[1px]">
+        {(data?.items ?? []).slice(0, 100).map((trade, i) => (
           <div
             key={trade.recordId || i}
             className="grid grid-cols-4 py-[3px] hover:bg-white/[0.02] transition-colors"
@@ -1054,7 +1054,7 @@ function TradeHistoryList({ pair }: { pair: string }) {
 export function Trade() {
   const [location, setLocation] = useLocation();
   const pathPair = location.replace("/trade/", "").replace("/trade", "");
-  const { data: pairsData } = useGetTradingPairs({ query: { queryKey: ["refetch"], refetchInterval: 30000 } });
+  const { data: pairsData } = useGetTradingPairs({ query: { refetchInterval: 30000 } });
   const pairs = pairsData?.pairs ?? [];
   const [orderFromBook, setOrderFromBook] = useState<OrderClickPayload | null>(null);
 
@@ -1155,7 +1155,7 @@ function DesktopTradeLayout({ currentPair }: { currentPair: string }) {
     switch (id) {
       case "trades":
         return (
-          <Card className="border-white/[0.04] p-4 space-y-3 h-full">
+          <Card className="border-white/[0.04] p-4 flex flex-col gap-3 h-full">
             <p className="text-[9px] uppercase tracking-widest text-muted-foreground/40 font-semibold">Recent Trades</p>
             <TradeHistoryList pair={currentPair} />
           </Card>

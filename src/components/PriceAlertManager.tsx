@@ -49,8 +49,8 @@ export function PriceAlertManager({ alerts, addAlert, removeAlert, clearTriggere
   const { data: tickers } = useGetTicker({});
   const { promptIfNeeded } = useNotifications();
 
-  const activePairs = tickers?.filter(t => t.enable).map(t => t.pair) ?? [];
-  const currentPrice = tickers?.find(t => t.pair === pair)?.lastPrice;
+  const activePairs = (tickers ?? []).filter(t => t.enable).map(t => t.pair);
+  const currentPrice = (tickers ?? []).find(t => t.pair === pair)?.lastPrice;
 
   const handleAdd = () => {
     const price = parseFloat(targetInput);

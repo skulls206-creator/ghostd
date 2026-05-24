@@ -804,7 +804,7 @@ export function Wallet() {
   const [expandedRow, setExpandedRow] = useState<ExpandedRow>(null);
   const [hideZero, setHideZero] = useState(false);
 
-  const balancesMap = new Map(balanceData?.balances.map((b) => [b.currency.id, b]));
+  const balancesMap = new Map((balanceData?.balances ?? []).map((b) => [b.currency.id, b]));
   const isLoading = loadingCurrencies || loadingBalances;
 
   useEffect(() => {

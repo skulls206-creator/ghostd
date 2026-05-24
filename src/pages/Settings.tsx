@@ -111,7 +111,7 @@ function TradingSection() {
     try { return (localStorage.getItem(DEFAULT_TYPE_KEY) as "market" | "limit") || "market"; } catch { return "market"; }
   });
 
-  const enabledPairs = tickers?.filter((t: any) => t.enable).map((t: any) => t.pair) ?? [];
+  const enabledPairs = (tickers ?? []).filter((t: any) => t.enable).map((t: any) => t.pair);
 
   const savePair = (pair: string) => {
     setDefaultPair(pair);

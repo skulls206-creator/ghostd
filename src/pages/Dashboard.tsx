@@ -97,7 +97,7 @@ export function Dashboard() {
   const { data: session } = useGetMe();
   const { data: balanceData, isLoading: loadingBalances } = useGetBalance();
   const { data: tickers, isLoading: loadingTickers } = useGetTicker({
-    query: { queryKey: ["q"], refetchInterval: 15000 }
+    query: { refetchInterval: 15000 }
   });
 
   const portfolioValue = useMemo(() => {
@@ -165,8 +165,8 @@ export function Dashboard() {
     label: new Date(p.ts).toLocaleDateString([], { month: "short", day: "numeric" }),
   }));
 
-  const activeCurrencies = balanceData?.balances.filter(b => b.balance > 0).length || 0;
-  const totalAssets = balanceData?.balances.length || 0;
+  const activeCurrencies = (balanceData?.balances ?? []).filter(b => b.balance > 0).length || 0;
+  const totalAssets = (balanceData?.balances ?? []).length || 0;
   const isUp = (portfolioChange?.pct ?? 0) >= 0;
 
   return (

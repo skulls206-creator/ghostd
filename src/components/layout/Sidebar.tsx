@@ -6,6 +6,7 @@ import { PriceAlertManager } from "@/components/PriceAlertManager";
 import { usePriceAlerts } from "@/hooks/usePriceAlerts";
 import { useState, useEffect } from "react";
 import { ThemePickerSidebarItem } from "@/components/ThemePicker";
+import { BUILD_VERSION } from "@/lib/version";
 
 const SIDEBAR_KEY = "crp_sidebar_expanded";
 
@@ -239,6 +240,13 @@ export function Sidebar({ user, onLogout }: SidebarProps) {
             </div>
           )}
         </div>
+
+        {/* Build version */}
+        {expanded && (
+          <div className="px-2.5 pb-1">
+            <p className="text-[10px] text-muted-foreground/40 font-mono select-none">{BUILD_VERSION}</p>
+          </div>
+        )}
       </div>
     </aside>
   );

@@ -8,6 +8,7 @@ import { useLogin, useGetMe, getGetMeQueryKey } from "@/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { KeyRound, Lock, Shield, ExternalLink, Download } from "lucide-react";
+import { BUILD_VERSION } from "@/lib/version";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
@@ -333,6 +334,11 @@ export function Login() {
             </p>
           </div>
         </div>
+      </div>
+
+      {/* Build version */}
+      <div className="fixed bottom-3 right-4">
+        <span className="text-[10px] text-muted-foreground/30 font-mono select-none">{BUILD_VERSION}</span>
       </div>
     </div>
   );
